@@ -1,0 +1,262 @@
+html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة مراقبة التوسع العمراني - بلدية فريانة</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS للخرائط -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js للرسوم البيانية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome للأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Cairo', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9edf2 100%);
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px -15px rgba(0,0,0,0.2);
+        }
+        #map {
+            height: 450px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header - رأس الصفحة -->
+    <header class="bg-gradient-to-r from-blue-900 to-slate-800 text-white py-8 shadow-xl">
+        <div class="container mx-auto px-4 text-center">
+            <i class="fas fa-city text-5xl mb-3 text-amber-400"></i>
+            <h1 class="text-3xl md:text-5xl font-bold">منصة مراقبة التوسع العمراني</h1>
+            <p class="text-lg md:text-xl mt-2">بلدية فريانة – ولاية القصرين</p>
+            <p class="text-md mt-4 opacity-80 max-w-2xl mx-auto">من مجال فلاحي إلى مجال شبه حضري: دراسة تحليلية للتوسع العمراني وإشكاليات التهيئة</p>
+            <div class="mt-4 flex justify-center gap-4 flex-wrap">
+                <span class="bg-amber-600 text-white px-4 py-1 rounded-full text-sm"><i class="fas fa-calendar-alt ml-1"></i> تربص 2026</span>
+                <span class="bg-emerald-600 text-white px-4 py-1 rounded-full text-sm"><i class="fas fa-chart-line ml-1"></i> PFE – تهيئة وتخطيط ترابي</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Section - قسم الإحصائيات -->
+    <section class="container mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="card bg-white rounded-2xl p-6 shadow-lg text-center">
+                <i class="fas fa-building text-4xl text-blue-600 mb-3"></i>
+                <div class="stat-number">+150</div>
+                <p class="text-gray-600 font-semibold mt-1">مطلب ربط مرفوض</p>
+            </div>
+            <div class="card bg-white rounded-2xl p-6 shadow-lg text-center">
+                <i class="fas fa-map-marked-alt text-4xl text-red-600 mb-3"></i>
+                <div class="stat-number">35%</div>
+                <p class="text-gray-600 font-semibold mt-1">بناء عشوائي</p>
+            </div>
+            <div class="card bg-white rounded-2xl p-6 shadow-lg text-center">
+                <i class="fas fa-tractor text-4xl text-green-700 mb-3"></i>
+                <div class="stat-number">4 → 3</div>
+                <p class="text-gray-600 font-semibold mt-1">هكتارات (موافقة فلاحية)</p>
+            </div>
+            <div class="card bg-white rounded-2xl p-6 shadow-lg text-center">
+                <i class="fas fa-clock text-4xl text-amber-600 mb-3"></i>
+                <div class="stat-number">16</div>
+                <p class="text-gray-600 font-semibold mt-1">هيكلاً متدخلاً</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section - قسم الخريطة -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="card bg-white rounded-2xl p-6 shadow-xl">
+            <div class="flex justify-between items-center mb-4 flex-wrap">
+                <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-map ml-2 text-red-600"></i> خريطة التوسع العمراني والفجوة بين مخطط 2008 والواقع</h2>
+                <span class="text-sm bg-gray-100 px-3 py-1 rounded-full">بيانات ميدانية – معاينات 2026</span>
+            </div>
+            <div id="map"></div>
+            <div class="mt-4 text-sm text-gray-500 flex justify-center gap-4 flex-wrap">
+                <span><i class="fas fa-square text-red-500"></i> توسع غير مبرمج</span>
+                <span><i class="fas fa-square text-green-600"></i> أراض فلاحية محفوظة</span>
+                <span><i class="fas fa-square text-blue-700"></i> مناطق مبرمجة 2008</span>
+                <span><i class="fas fa-exclamation-triangle text-amber-500"></i> بناء عشوائي</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts Section - قسم الرسوم البيانية -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="card bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4"><i class="fas fa-chart-pie ml-2 text-blue-600"></i> أسباب رفض رخص البناء (جلسة 2 أفريل 2026)</h3>
+                <canvas id="reasonsChart" width="400" height="300"></canvas>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p><strong>السبب الرئيسي:</strong> 40% من الرفض بسبب وقوع العقار في أراض فلاحية أو قرب من الأودية.</p>
+                </div>
+            </div>
+            <div class="card bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-4"><i class="fas fa-chart-bar ml-2 text-green-600"></i> أكثر المناطق تضرراً بالبناء العشوائي</h3>
+                <canvas id="zonesChart" width="400" height="300"></canvas>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p>حي الحدائق (العرق الشرقي) والزرداء في المقدمة.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section - معرض الصور -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="card bg-white rounded-2xl p-6 shadow-xl">
+            <h2 class="text-2xl font-bold mb-6"><i class="fas fa-camera ml-2 text-purple-600"></i> توثيق ميداني – معاينات ومشاهد</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform">
+                    <img src="https://via.placeholder.com/400x250?text=معاينة+ماء+وكهرباء" alt="معاينة" class="w-full h-48 object-cover">
+                    <div class="p-2 text-center text-sm bg-gray-100">معاينة مطلب ربط – يوم الجمعة</div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform">
+                    <img src="https://via.placeholder.com/400x250?text=بناء+عشوائي+حي+الحدائق" alt="بناء عشوائي" class="w-full h-48 object-cover">
+                    <div class="p-2 text-center text-sm bg-gray-100">بناء عشوائي – حي الحدائق (العرق الشرقي)</div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform">
+                    <img src="https://via.placeholder.com/400x250?text=جلسة+2+افريل+2026" alt="جلسة رخص البناء" class="w-full h-48 object-cover">
+                    <div class="p-2 text-center text-sm bg-gray-100">جلسة دراسة رخص البناء – 2 أفريل 2026</div>
+                </div>
+            </div>
+            <p class="text-center text-gray-500 text-sm mt-4">ملاحظة: الصور التوضيحية – الأصلية موجودة في ملف الـ PDF الخاص بالبحث.</p>
+        </div>
+    </section>
+
+    <!-- Download Section - قسم التحميل -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="card bg-gradient-to-r from-blue-800 to-indigo-800 rounded-2xl p-8 shadow-xl text-center text-white">
+            <i class="fas fa-file-pdf text-5xl mb-4 text-red-300"></i>
+            <h2 class="text-2xl font-bold mb-2">النص الكامل للبحث (PFE)</h2>
+            <p class="mb-4 opacity-90">للإطلاع على الدراسة كاملة والمراجع والتحليلات الإحصائية</p>
+            <a href="#" class="inline-block bg-white text-blue-800 font-bold py-3 px-8 rounded-full shadow-lg hover:bg-gray-100 transition-all transform hover:scale-105">
+                <i class="fas fa-download ml-2"></i> تحميل البحث بصيغة PDF
+            </a>
+            <p class="text-xs mt-4 opacity-70">* سيتم إضافة الرابط بعد رفع الملف النهائي</p>
+        </div>
+    </section>
+
+    <!-- About & Conclusion - معلومات وخاتمة -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="card bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-3"><i class="fas fa-user-graduate ml-2 text-amber-600"></i> عن الباحث</h3>
+                <p>طالب في اختصاص <strong>التهيئة والتخطيط الترابي</strong>، قمت بتربص ميداني ببلدية فريانة من 23 مارس إلى 25 أفريل 2026. اشتغلت على دراسة واقع التوسع العمراني، وشاركت في معاينات ربط الماء والكهرباء، وحضرت جلسات دراسة رخص البناء، وحللت مراجعة مثال التهيئة العمرانية باستخدام AutoCAD.</p>
+            </div>
+            <div class="card bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="text-xl font-bold mb-3"><i class="fas fa-lightbulb ml-2 text-amber-600"></i> خلاصة البحث</h3>
+                <p>أثبتت الدراسة أن التحول من مجال فلاحي إلى شبه حضري بفعل العوامل الاقتصادية (الكونترا) أدى إلى توسع عمراني سريع وغير منظم، وأن مثال التهيئة لسنة 2008 لم يعد قادراً على مواكبة الواقع، مما يستوجب مراجعة دورية كل 5 سنوات وتبسيط الإجراءات الإدارية وإدماج تقنيات GIS.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer - تذييل الصفحة -->
+    <footer class="bg-gray-900 text-white py-6 mt-12 text-center">
+        <p>© 2026 – PFE في التهيئة العمرانية | بلدية فريانة – ولاية القصرين | جميع الحقوق محفوظة</p>
+        <p class="text-sm opacity-50 mt-1">منصة تفاعلية لتوثيق ومراقبة التوسع العمراني</p>
+    </footer>
+
+    <script>
+        // Initialize map - بدء الخريطة
+        var map = L.map('map').setView([35.185, 8.715], 13); // إحداثيات تقريبية لفريانة
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // التوسع غير المبرمج – حي الحدائق (العرق الشرقي)
+        L.circle([35.19, 8.73], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.3,
+            radius: 500
+        }).addTo(map).bindPopup('<b>حي الحدائق (العرق الشرقي)</b><br>توسع عمراني غير مبرمج');
+
+        // الزرداء
+        L.circle([35.175, 8.70], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.3,
+            radius: 400
+        }).addTo(map).bindPopup('<b>منطقة الزرداء</b><br>توسع سريع خارج المخطط');
+
+        // أراض فلاحية محفوظة
+        L.polygon([
+            [35.165, 8.69],
+            [35.17, 8.71],
+            [35.155, 8.72],
+            [35.15, 8.70]
+        ], {
+            color: 'green',
+            fillColor: '#2ecc71',
+            fillOpacity: 0.2,
+            weight: 2
+        }).addTo(map).bindPopup('أراض فلاحية محفوظة – موافقة جزئية من مصالح الفلاحة');
+
+        // مستشفى جديد غير مبرمج
+        L.marker([35.188, 8.718]).addTo(map)
+            .bindPopup('<b>المستشفى الجهوي الجديد</b><br>موجود فعلياً – غير مبرمج في مخطط 2008');
+
+        // ملعب
+        L.marker([35.182, 8.725]).addTo(map)
+            .bindPopup('<b>الملعب البلدي</b><br>غير مبرمج في المخطط الأصلي');
+
+        // مدرسة إعدادية
+        L.marker([35.178, 8.715]).addTo(map)
+            .bindPopup('<b>المدرسة الإعدادية</b><br>غير مبرمجة في مخطط 2008');
+
+        // بناء عشوائي اضافي
+        L.marker([35.17, 8.705]).addTo(map)
+            .bindPopup('<b>بناء عشوائي</b><br>تمت معاينته خلال التربص');
+
+        // Chart 1: أسباب رفض الرخص
+        const ctx1 = document.getElementById('reasonsChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: ['أرض فلاحية / قرب من واد', 'نقص وثائق', 'مخالفة الارتدادات/العلو', 'غياب موافقات', 'مشاكل عقارية'],
+                datasets: [{
+                    data: [40, 25, 15, 12, 8],
+                    backgroundColor: ['#e74c3c', '#f39c12', '#3498db', '#2ecc71', '#9b59b6']
+                }]
+            }
+        });
+
+        // Chart 2: أكثر المناطق تضررا
+        const ctx2 = document.getElementById('zonesChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['حي الحدائق', 'الزرداء', 'الطريق الحدودي', 'وسط المدينة القديم'],
+                datasets: [{
+                    label: 'نسبة البناء العشوائي',
+                    data: [38, 32, 18, 12],
+                    backgroundColor: '#e67e22',
+                    borderRadius: 10
+                }]
+            }
+        });
+    </script>
+</body>
+</html>
